@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShiftZero — Free Balance Transfer Calculator: Compare 0% APR Offers &amp; Payoff Plans</title>
+<meta name="description" content="ShiftZero is a free balance transfer calculator. Compare up to 3 balance-transfer offers side by side, find your required monthly payment, break-even month, and see which 0% APR deal saves you the most. No signup.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0A0A0F; --violet:#A78BFA; --mint:#34D399; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:'Space Grotesk',system-ui,sans-serif; background:var(--bg); }
+  .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; }
+  .panel{ background:#12121A; border:1px solid rgba(167,139,250,.18); border-radius:1.1rem; }
+  .panel-mint{ border-color:rgba(52,211,153,.22); }
+  .field{ background:#0A0A0F; border:1px solid rgba(148,163,184,.25); border-radius:.65rem; color:#EDE9FE; padding:.6rem .75rem; width:100%; }
+  .field:focus{ outline:none; border-color:var(--violet); box-shadow:0 0 0 3px rgba(167,139,250,.18); }
+  label.lbl{ display:block; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:#8B8B9E; margin-bottom:.35rem; font-weight:600; }
+  .btn-primary{ background:linear-gradient(135deg,#A78BFA,#8B5CF6); color:#0A0A0F; font-weight:700; border-radius:.7rem; padding:.7rem 1.4rem; transition:transform .12s, box-shadow .12s; }
+  .btn-primary:hover{ transform:translateY(-1px); box-shadow:0 8px 26px rgba(167,139,250,.4); }
+  .btn-ghost{ border:1px solid rgba(148,163,184,.3); color:#C4B5FD; border-radius:.7rem; padding:.6rem 1.1rem; transition:all .12s; font-weight:600; }
+  .btn-ghost:hover{ border-color:var(--mint); color:var(--mint); }
+  .grad-text{ background:linear-gradient(100deg,#A78BFA 10%,#34D399 90%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .offer-card{ background:#14141E; border:1px solid rgba(167,139,250,.22); border-radius:1rem; position:relative; transition:border-color .15s; }
+  .offer-card:hover{ border-color:rgba(167,139,250,.5); }
+  .offer-card.winner{ border-color:var(--mint); box-shadow:0 0 0 2px rgba(52,211,153,.25), 0 14px 40px rgba(0,0,0,.5); }
+  .rank-pill{ width:2.4rem; height:2.4rem; border-radius:9999px; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'JetBrains Mono',monospace; }
+  .cmp-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:.9rem; }
+  .cmp-table th{ text-align:left; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#8B8B9E; padding:.7rem .9rem; border-bottom:1px solid rgba(148,163,184,.18); white-space:nowrap; }
+  .cmp-table td{ padding:.85rem .9rem; border-bottom:1px solid rgba(148,163,184,.1); color:#D8D8E6; vertical-align:middle; }
+  .cmp-table tr.row-winner td{ background:rgba(52,211,153,.06); }
+  .cmp-table tr:last-child td{ border-bottom:none; }
+  input[type=range].slider{ width:100%; accent-color:#34D399; }
+  details.faq{ background:#12121A; border:1px solid rgba(167,139,250,.16); border-radius:.8rem; padding:1rem 1.25rem; }
+  details.faq summary{ cursor:pointer; font-weight:600; color:#EDE9FE; list-style:none; }
+  details.faq summary::-webkit-details-marker{ display:none; }
+  details.faq summary::after{ content:'+'; float:right; color:var(--mint); font-size:1.3rem; line-height:1; font-weight:700; }
+  details.faq[open] summary::after{ content:'–'; }
+  details.faq p{ color:#9C9CB0; margin-top:.6rem; line-height:1.75; }
+  .article h2{ color:#F5F3FF; font-size:1.45rem; font-weight:700; margin:2.2rem 0 .8rem; }
+  .article h3{ color:#DDD6FE; font-size:1.1rem; font-weight:600; margin:1.6rem 0 .6rem; }
+  .article p{ color:#9C9CB0; line-height:1.85; margin-bottom:1rem; }
+  .article strong{ color:#EDE9FE; }
+  .article ul{ color:#9C9CB0; line-height:1.85; margin:0 0 1rem 1.2rem; list-style:disc; }
+  .article li{ margin-bottom:.4rem; }
+  .article .disclaimer{ border-left:3px solid var(--mint); background:rgba(52,211,153,.06); padding:1rem 1.25rem; border-radius:0 .8rem .8rem 0; }
+  .tl-grid{ stroke:rgba(148,163,184,.12); stroke-width:1; }
+  .tl-axis{ fill:#8B8B9E; font-size:11px; font-family:'JetBrains Mono',monospace; }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-track{ background:#0A0A0F; }
+  ::-webkit-scrollbar-thumb{ background:#26263a; border-radius:6px; }
+  @media print{ .no-print{ display:none !important; } }
+</style>
+</head>
+<body id="top" class="text-slate-200 antialiased">
+
+<!-- ============ HEADER ============ -->
+<header class="sticky top-0 z-50 border-b border-violet-500/20" style="background:rgba(10,10,15,.92);backdrop-filter:blur(10px)">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#A78BFA" stroke-width="2.4"/>
+        <path d="M7 12h10M12 7v10" stroke="#34D399" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <span class="text-xl font-bold tracking-tight text-white">SHIFT<span style="color:#A78BFA">ZERO</span></span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm font-medium">
+      <a href="#top" class="text-slate-300 hover:text-white transition">Home</a>
+      <a href="https://fixoraa.tech" class="text-slate-300 hover:text-white transition">More Tools</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ TOP AD ============ -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pt-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <div class="origin-top scale-[0.44] sm:scale-100 shrink-0">
+        <script>
+          atOptions = { 'key' : '4e68ac77881c17fe128a46565d9a4e8c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
+        </script>
+        <script src="https://www.highrevenueformat.com/4e68ac77881c17fe128a46565d9a4e8c/invoke.js"></script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<main class="mx-auto max-w-6xl px-4 sm:px-6">
+  <section class="text-center pt-10 pb-8">
+    <p class="mono text-[11px] tracking-[0.3em] uppercase mb-4" style="color:#34D399">0% APR · Transfer Arena · Payoff Lab</p>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-white">Balance Transfer <span class="grad-text">Optimizer</span></h1>
+    <p class="mt-4 max-w-2xl mx-auto text-slate-400 text-lg">Compare up to 3 balance-transfer offers side by side. ShiftZero ranks them by total cost of transfer, tells you the exact monthly payment to be debt-free before the intro ends, and shows the month the transfer fee pays for itself.</p>
+    <div class="mt-5 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold" style="border-color:rgba(52,211,153,.5);color:#34D399;background:rgba(52,211,153,.07)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Unlimited Free Usage
+    </div>
+    <p class="mt-2 text-xs text-slate-500">No signup · No paywall · No watermark · Everything runs in your browser</p>
+  </section>
+
+  <!-- ============ STEP 1: YOUR DEBT ============ -->
+  <section class="panel p-5 sm:p-7 mb-6">
+    <div class="flex items-center gap-3 mb-5">
+      <span class="rank-pill" style="background:rgba(167,139,250,.15);color:#A78BFA;border:1px solid rgba(167,139,250,.4)">1</span>
+      <h2 class="text-xl font-bold text-white">Your current debt</h2>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label class="lbl" for="sz-balance">Balance to transfer ($)</label>
+        <input id="sz-balance" class="field mono" type="number" min="0" step="0.01" value="8500" inputmode="decimal">
+      </div>
+      <div>
+        <label class="lbl" for="sz-current-apr">Current card APR (%)</label>
+        <input id="sz-current-apr" class="field mono" type="number" min="0" max="100" step="0.01" value="24.99" inputmode="decimal">
+      </div>
+      <div>
+        <label class="lbl" for="sz-payment">Monthly payment you can make ($)</label>
+        <input id="sz-payment" class="field mono" type="number" min="0" step="0.01" value="400" inputmode="decimal">
+      </div>
+    </div>
+    <p id="sz-errors" class="mt-3 text-sm font-medium" style="color:#F87171" role="alert"></p>
+  </section>
+
+  <!-- ============ STEP 2: OFFERS ============ -->
+  <section class="mb-6">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="rank-pill" style="background:rgba(167,139,250,.15);color:#A78BFA;border:1px solid rgba(167,139,250,.4)">2</span>
+        <h2 class="text-xl font-bold text-white">The offers <span class="text-sm font-normal text-slate-500">(up to 3)</span></h2>
+      </div>
+      <button id="sz-add-offer" class="btn-ghost text-sm no-print">+ Add offer</button>
+    </div>
+    <div id="sz-offer-list" class="grid md:grid-cols-3 gap-4"></div>
+    <div class="text-center mt-6">
+      <button id="sz-compare-btn" class="btn-primary text-base no-print">Compare offers</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="sz-results" class="hidden">
+    <div id="sz-winner" class="panel panel-mint p-5 sm:p-6 mb-6"></div>
+
+    <div class="panel p-5 sm:p-6 mb-6 overflow-x-auto">
+      <h2 class="text-xl font-bold text-white mb-1">Offer ranking</h2>
+      <p class="text-sm text-slate-500 mb-4">Ranked by <strong class="text-slate-300">total cost of transfer</strong> — transfer fee plus every dollar of interest until you are debt-free.</p>
+      <div id="sz-rank-table"></div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6 mb-6">
+      <!-- planner -->
+      <div id="sz-planner" class="panel p-5 sm:p-6"></div>
+      <!-- break-even -->
+      <div class="panel p-5 sm:p-6">
+        <h2 class="text-xl font-bold text-white mb-1">Fee break-even</h2>
+        <p class="text-sm text-slate-500 mb-4">The month when the transfer fee pays for itself versus staying at your current APR.</p>
+        <div id="sz-break-even"></div>
+      </div>
+    </div>
+
+    <!-- timeline -->
+    <div class="panel p-5 sm:p-6 mb-6">
+      <h2 class="text-xl font-bold text-white mb-1">Payoff timeline</h2>
+      <p class="text-sm text-slate-500 mb-4">Remaining debt month by month: the winning offer versus doing nothing.</p>
+      <div id="sz-timeline"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ BOTTOM AD ============ -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pb-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="464498"></script>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SEO ARTICLE ============ -->
+<div class="mx-auto max-w-6xl px-4 sm:px-6 pb-10">
+  <article id="seo-article" class="article max-w-3xl mx-auto">
+    <h2>Balance Transfer Calculator: Is a Balance Transfer Worth It?</h2>
+    <p>A balance transfer moves high-interest credit card debt onto a new card that offers a low or 0% introductory APR for a fixed number of months. The pitch is simple: stop paying 20–30% interest, pay little or nothing for a year or more, and use that window to attack the principal. In practice, the answer to "is a balance transfer worth it" always comes down to three numbers — the transfer fee, the length of the intro period, and what you actually pay each month. A <strong>balance transfer calculator</strong> exists to put those three numbers together before you apply, because the marketing on these offers is designed to make every deal look like free money. It is not free money. It is cheaper money, sometimes dramatically cheaper, and the difference between a great transfer and a mediocre one can be over a thousand dollars on a single $8,500 balance.</p>
+
+    <h2>How This 0% APR Balance Transfer Savings Calculator Works</h2>
+    <p>Most calculators on the internet ask for one offer and give you one number. ShiftZero works the way a real decision works: you line up to three offers side by side, enter your balance, your current APR, and the monthly payment you can honestly sustain, and the tool simulates every offer month by month. The simulation adds the transfer fee to the balance on day one — because that is what issuers do — then accrues interest at the intro APR during the promo window and the post-intro APR afterward, applying your payment to the highest-rate debt first. If your balance is bigger than an offer's credit limit, the tool does not pretend the extra debt disappears: the leftover keeps accruing at your current APR and is included in that offer's total cost. Each offer then gets a <strong>total-cost-of-transfer score</strong> — the transfer fee plus every dollar of interest you will pay until the debt is gone — and the offers are ranked lowest to highest. That single score is the fairest way to compare a 3% fee with 18 months at 0% against a 5% fee with 21 months at 0%, because the "better" headline number is not always the cheaper deal.</p>
+
+    <h2>The Transfer Fee: Why the Break-Even Month Matters</h2>
+    <p>The transfer fee is the part people underestimate. Typical balance transfer fees run 3% to 5% of the transferred amount, and they are charged up front and added to your balance. On an $8,500 transfer, a 3% fee is $255 and a 5% fee is $425 — money you owe from the first day. The fee break-even month is the point where the interest you avoided finally exceeds the fee you paid. Until that month, the transfer has technically cost you money versus doing nothing. After that month, every dollar of avoided interest is pure savings.</p>
+    <p>Here is why that matters more than the intro length alone. Imagine two offers on that $8,500 balance at 24.99% APR with $400 monthly payments: Offer A charges 3% for 18 months at 0%, Offer B charges 5% for 21 months at 0%. Offer B's longer window looks better, but its fee is $170 higher. If you can pay aggressively and would clear the debt in 14 months anyway, Offer A wins — you never needed the extra three months, so you paid $170 for nothing. If you can only pay $300 a month, you need about 30 months to clear the debt, the intro window expires either way, and the ranking flips toward whichever combination of fee and post-intro rate costs less on the months after the promo ends. The break-even month makes this visible: a good <strong>0% APR balance transfer savings calculator</strong> should always show it, because it is the moment your decision starts paying you back.</p>
+
+    <h2>The Required Monthly Payment Planner: Beat the Intro Deadline</h2>
+    <p>The single most expensive mistake in balance transfers is treating the intro period as a vacation from payments. It is not a vacation; it is a deadline. Whatever balance remains when the intro APR expires starts accruing interest at the regular APR — often 24% to 29% — and at that point the transfer can cost more than staying put. The required-monthly-payment planner solves this with one exact number: the payment that takes your transferred balance (fee included) to precisely $0 in the final month of the intro period. It uses the standard amortization formula, so if the intro APR is a true 0%, it is simply the total divided by the number of months; if the intro APR is a low-but-not-zero rate like 1.99%, the math adjusts for the small interest accrual.</p>
+    <p>Use this number as your target, not your current payment. If you are paying $400 a month but the planner says $512, you have a choice: find the extra $112, pick a longer intro offer, or accept that some balance will survive into the high-rate period and pick the offer with the cheapest post-intro math. What you should not do is pick the offer blind and hope. Drag the planner slider and watch the payoff month move — the tool tells you instantly whether a payment beats the deadline or falls short, and by how much.</p>
+
+    <h2>How to Read the Offer Ranking</h2>
+    <p>The ranking table scores every valid offer on total cost of transfer, then sorts cheapest first. Ties are broken by input order, so list your favorite first if two offers come out equal. Next to each offer you will see the transfer fee in dollars, the total interest across the whole payoff, the months until you are debt-free, the required monthly payment to beat the intro deadline, and the break-even month. A few patterns to watch for: an offer with a 0% intro APR and 0 transfer fee but a short window can lose to a 3% fee with a much longer window if your payment is small; an offer with a generous limit wins automatically when your balance exceeds a rival's limit, because the leftover debt keeps compounding at your old APR; and an offer whose intro APR is not quite 0% can still win if its fee is low and your payment is aggressive enough to finish early.</p>
+
+    <h2>Worked Example: Doing the Math by Hand</h2>
+    <p>Say you owe $8,500 at 24.99% APR and can pay $400 a month. Doing nothing, the balance accrues about $177 of interest in the first month alone, and you will pay roughly $2,100 in total interest over about 27 months. Now transfer to a 0% intro offer with a 3% fee and 18 months: the fee adds $255, the new balance is $8,755, and at $400 a month with no interest you clear it in about 22 months — but wait, the intro ends at month 18 with roughly $1,555 still owed, and that remainder accrues at the post-intro APR of 24.99% for the last few months, adding around $150 of interest. Total cost: $255 fee plus $150 interest, about $405, versus $2,100 doing nothing. Savings: roughly $1,700. But notice the planner would have told you the required payment was about $487 a month — pay that and the cost drops to just the $255 fee, saving another $150. This is the whole game: the fee is fixed, the interest is a function of your payment discipline, and the <strong>balance transfer calculator</strong> exists to show you the exact trade-off before you commit.</p>
+
+    <h2>Mistakes That Wipe Out the Savings</h2>
+    <p>Balance transfers fail in predictable ways. The most common is making only minimum payments during the intro period and then getting hit with the post-intro APR on a large remaining balance — at that point you paid a fee for the privilege of a delayed interest bill. The second is using the new card for purchases: many issuers apply payments to the transferred balance first while new purchases accrue interest immediately at the purchase APR, with no grace period. The third is opening the transfer and then running the old card back up; now you have two balances and one fee. The fourth is missing the transfer deadline — most offers require the transfer to complete within 60 to 90 days of account opening, or the promo terms do not apply. And the fifth is ignoring the credit limit: if you are approved for less than your full balance, the remainder stays at the old rate, which is exactly why this tool models leftover debt instead of hiding it.</p>
+    <ul>
+      <li>Set the required monthly payment as an automatic payment on day one, not as an aspiration.</li>
+      <li>Do not make new purchases on the transfer card during the intro period.</li>
+      <li>Complete the transfer within the issuer's promo window, usually 60–90 days.</li>
+      <li>Check whether the fee is 3% or 5% — on large balances that two-point gap is hundreds of dollars.</li>
+      <li>Have a plan for any balance that will survive past the intro APR expiration.</li>
+    </ul>
+
+    <h2>When a Balance Transfer Is NOT Worth It</h2>
+    <p>Sometimes the honest answer from a <strong>balance transfer calculator</strong> is "don't." If your balance is small enough to clear in three or four months, the fee can exceed the interest you would have paid — a 3% fee on $1,500 is $45, while three months of interest at 24.99% on a rapidly shrinking balance is roughly $50, so the savings are trivial and not worth a hard inquiry. If you cannot commit to payments meaningfully above the minimum, you will carry a balance into the post-intro APR and may end up worse off. If the offers available to you carry 5% fees with short intro windows and high post-intro rates, the break-even month may never arrive — the tool will tell you so directly. And if your spending is the reason for the debt, a transfer without a spending plan just rearranges the problem. A balance transfer is a tool for people with a payoff plan, not a rescue for people without one.</p>
+
+    <h2>Balance Transfers and Your Credit Score</h2>
+    <p>Applying for a new card triggers a hard inquiry, which typically costs a few points temporarily. Opening a new account lowers your average account age, another small short-term ding. But there is good news on the other side: the new credit limit increases your total available credit, which can improve your utilization ratio — the second biggest factor in most scoring models — as long as you do not fill the new limit with fresh spending. Many people see their score dip slightly for a month or two and then rise above the starting point as utilization drops. Closing the old card after the transfer is usually a mistake, since it erases that available credit and can spike your utilization. Keep it open, keep it at zero, and let the utilization math work for you.</p>
+
+    <div class="disclaimer mt-8">
+      <p class="!mb-0 text-sm"><strong>Finance disclaimer:</strong> ShiftZero is an educational planning tool, not a financial advisor. The numbers it produces are estimates based on the inputs you provide and simplified assumptions — real cards may compound interest daily, charge different fees for different transfer windows, or apply payments in a different order. This content is for general information only and is not financial advice, and nothing here is an offer of credit. Before applying for any balance transfer card, read the issuer's full terms and consider speaking with a qualified financial professional about your situation.</p>
+    </div>
+  </article>
+
+  <!-- ============ FAQs ============ -->
+  <div class="max-w-3xl mx-auto mt-10">
+    <h2 class="text-2xl font-bold text-white mb-5 text-center">Frequently asked questions</h2>
+    <div class="space-y-3">
+      <details class="faq">
+        <summary>What is a balance transfer fee and how is it calculated?</summary>
+        <p>A balance transfer fee is typically 3% to 5% of the amount you move, charged by the new card issuer and added to your transferred balance on day one. On a $10,000 transfer, a 3% fee adds $300, so you start owing $10,300. The fee is the upfront price of the intro APR — ShiftZero shows you the break-even month when the interest you avoid finally exceeds that fee.</p>
+      </details>
+      <details class="faq">
+        <summary>Is a balance transfer worth it if the fee is 3%?</summary>
+        <p>Usually yes, if you have a payoff plan. A 3% fee on $8,500 is $255; carrying that balance at 24.99% APR with $400 monthly payments costs over $2,000 in interest. The transfer wins by a wide margin as long as you pay enough each month to clear most of the balance before the intro APR expires. Use the required-monthly-payment planner above to find your exact target.</p>
+      </details>
+      <details class="faq">
+        <summary>What happens if I don't pay off the balance before the intro period ends?</summary>
+        <p>Any remaining balance starts accruing interest at the card's regular post-intro APR, which is often 24% to 29%. You do not usually get charged retroactive interest on what you already paid off — but the leftover balance gets expensive fast. That is why the planner's deadline number matters more than the intro length alone.</p>
+      </details>
+      <details class="faq">
+        <summary>Will a balance transfer hurt my credit score?</summary>
+        <p>Expect a small temporary dip from the hard inquiry and the new account lowering your average account age. Over a few months, most people recover and often improve, because the new credit limit lowers your utilization ratio — as long as you don't run up new debt. Keeping the old card open (at $0) helps utilization too.</p>
+      </details>
+      <details class="faq">
+        <summary>Can I transfer a balance higher than the new card's credit limit?</summary>
+        <p>No — you can only transfer up to the approved credit limit, and some issuers cap transfers at a percentage of the limit. Any leftover stays on your old card at the old APR. ShiftZero models this honestly: if your balance exceeds an offer's limit, the leftover debt keeps accruing at your current APR inside that offer's total cost.</p>
+      </details>
+      <details class="faq">
+        <summary>What's the difference between the intro APR and the regular APR?</summary>
+        <p>The intro APR is a promotional rate — often 0% — that applies to transferred balances for a fixed window, usually 12 to 21 months. The regular (post-intro) APR is the ongoing rate, typically 19% to 29%, that applies to any balance remaining after the window closes and to new purchases. Always compare offers on the full timeline, not just the promo rate.</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a balance transfer fee and how is it calculated?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A balance transfer fee is typically 3% to 5% of the amount you move, charged by the new card issuer and added to your transferred balance on day one. On a $10,000 transfer, a 3% fee adds $300, so you start owing $10,300." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is a balance transfer worth it if the fee is 3%?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Usually yes, if you have a payoff plan. A 3% fee on $8,500 is $255; carrying that balance at 24.99% APR with $400 monthly payments costs over $2,000 in interest. The transfer wins by a wide margin as long as you pay enough each month to clear most of the balance before the intro APR expires." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I don't pay off the balance before the intro period ends?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Any remaining balance starts accruing interest at the card's regular post-intro APR, which is often 24% to 29%. You do not usually get charged retroactive interest on what you already paid off, but the leftover balance gets expensive fast." }
+    },
+    {
+      "@type": "Question",
+      "name": "Will a balance transfer hurt my credit score?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Expect a small temporary dip from the hard inquiry and the new account lowering your average account age. Over a few months, most people recover and often improve, because the new credit limit lowers your utilization ratio, as long as you don't run up new debt." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I transfer a balance higher than the new card's credit limit?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. You can only transfer up to the approved credit limit, and some issuers cap transfers at a percentage of the limit. Any leftover stays on your old card at the old APR." }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between the intro APR and the regular APR?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The intro APR is a promotional rate, often 0%, that applies to transferred balances for a fixed window, usually 12 to 21 months. The regular (post-intro) APR is the ongoing rate, typically 19% to 29%, that applies to any balance remaining after the window closes." }
+    }
+  ]
+}
+</script>
+
+<!-- ============ PURE LOGIC LIB (inlined at build time) ============ -->
+<script id="v3-shiftzero-balance-transfer-lib">
+/* ShiftZero — Balance transfer optimizer logic.
+ * Pure functions only: no DOM, window, document, localStorage, navigator.
+ * Shipped inside <script id="v3-shiftzero-balance-transfer-lib">.
+ * Tests eval this exact block from the finished HTML.
+ */
+'use strict';
+
+function trimStr(s){ return (s === undefined || s === null) ? '' : String(s).trim(); }
+
+function parseNum(v, fallback){
+  if (fallback === undefined) fallback = 0;
+  if (typeof v === 'number' && isFinite(v)) return v;
+  var s = trimStr(v).replace(/[$,%\s]/g, '');
+  if (s === '' || s === '-' || s === '.' || s === '-.') return fallback;
+  var n = parseFloat(s);
+  return isFinite(n) ? n : fallback;
+}
+
+function clampNum(v, min, max){
+  if (!isFinite(v)) v = min;
+  if (v < min) v = min;
+  if (v > max) v = max;
+  return v;
+}
+
+function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+function fmtMoney(n){
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  var neg = n < 0;
+  var a = Math.abs(n);
+  var parts = a.toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-$' : '$') + parts[0] + '.' + parts[1];
+}
+
+function fmtPct(n){
+  if (!isFinite(n)) return '—';
+  return (Math.round(n * 100) / 100) + '%';
+}
+
+/* Two starter offers so the tool works on first load. */
+function defaultOffers(){
+  return [
+    { name: 'Card A', feePct: 3, introApr: 0, introMonths: 18, postIntroApr: 24.99, limit: 15000 },
+    { name: 'Card B', feePct: 5, introApr: 0, introMonths: 21, postIntroApr: 27.99, limit: 12000 }
+  ];
+}
+
+function sanitizeOffer(raw){
+  raw = raw || {};
+  return {
+    name: trimStr(raw.name) || 'Offer',
+    feePct: clampNum(parseNum(raw.feePct, 3), 0, 100),
+    introApr: clampNum(parseNum(raw.introApr, 0), 0, 100),
+    introMonths: Math.max(0, Math.round(clampNum(parseNum(raw.introMonths, 12), 0, 120))),
+    postIntroApr: clampNum(parseNum(raw.postIntroApr, 24.99), 0, 100),
+    limit: clampNum(parseNum(raw.limit, 15000), 0, 100000000)
+  };
+}
+
+function validateInputs(balance, currentApr, monthlyPayment){
+  var errs = [];
+  var b = parseNum(balance, NaN);
+  var a = parseNum(currentApr, NaN);
+  var p = parseNum(monthlyPayment, NaN);
+  if (!isFinite(b) || b <= 0) errs.push('Enter a balance greater than $0.');
+  if (!isFinite(a) || a < 0 || a > 100) errs.push('Current APR must be between 0% and 100%.');
+  if (!isFinite(p) || p <= 0) errs.push('Enter a monthly payment greater than $0.');
+  return errs;
+}
+
+function validateOffer(o){
+  var errs = [];
+  if (!trimStr(o.name)) errs.push('Give the offer a name.');
+  if (!(o.limit > 0)) errs.push('Credit limit must be greater than $0.');
+  if (!(o.feePct >= 0 && o.feePct <= 15)) errs.push('Transfer fee must be between 0% and 15%.');
+  if (!(o.introApr >= 0 && o.introApr <= 40)) errs.push('Intro APR must be between 0% and 40%.');
+  if (!(o.introMonths >= 0 && o.introMonths <= 36)) errs.push('Intro months must be between 0 and 36.');
+  if (!(o.postIntroApr >= 0 && o.postIntroApr <= 40)) errs.push('Post-intro APR must be between 0% and 40%.');
+  return errs;
+}
+
+/* Simulate a balance transfer.
+ * transferred = min(balance, limit); the rest (leftover) keeps accruing at currentApr.
+ * The transfer fee is added to the offer balance up front (typical issuer behavior).
+ * Each month the payment goes to whichever debt carries the higher rate first.
+ */
+function simulateTransfer(o, balance, currentApr, monthlyPayment){
+  var b = Math.max(0, parseNum(balance, 0));
+  var pay = Math.max(0, parseNum(monthlyPayment, 0));
+  var curApr = clampNum(parseNum(currentApr, 0), 0, 100);
+  var transferred = Math.min(b, o.limit);
+  var feeAmt = transferred * clampNum(o.feePct, 0, 100) / 100;
+  var offerDebt = transferred + feeAmt;
+  var leftover = b - transferred;
+  var leftoverInitial = leftover;
+  var introRate = clampNum(o.introApr, 0, 100) / 100 / 12;
+  var postRate = clampNum(o.postIntroApr, 0, 100) / 100 / 12;
+  var curRate = curApr / 100 / 12;
+  var introMonths = Math.max(0, Math.round(o.introMonths));
+  var debtAfterIntro = offerDebt;
+  var interestAfterIntro = 0;
+  var totalInterest = 0;
+  var schedule = [];
+  var month = 0;
+  var offerPayoffMonth = null;
+  var MAX = 600;
+  while (month < MAX && (offerDebt > 0.005 || leftover > 0.005)){
+    if (pay <= 0) break;
+    month++;
+    var rOffer = month <= introMonths ? introRate : postRate;
+    var iOffer = offerDebt * rOffer;
+    var iLeft = leftover * curRate;
+    offerDebt += iOffer;
+    leftover += iLeft;
+    totalInterest += iOffer + iLeft;
+    if (month > introMonths) interestAfterIntro += iOffer + iLeft;
+    var payMade = Math.min(pay, offerDebt + leftover);
+    var rem = payMade;
+    if (curRate >= rOffer){
+      var toLeft = Math.min(rem, leftover); leftover -= toLeft; rem -= toLeft;
+      offerDebt = Math.max(0, offerDebt - rem);
+    } else {
+      var toOffer = Math.min(rem, offerDebt); offerDebt -= toOffer; rem -= toOffer;
+      leftover = Math.max(0, leftover - rem);
+    }
+    if (offerPayoffMonth === null && offerDebt <= 0.005) offerPayoffMonth = month;
+    if (month === introMonths) debtAfterIntro = offerDebt;
+    schedule.push({
+      month: month,
+      offerDebt: round2(offerDebt),
+      leftoverDebt: round2(leftover),
+      totalDebt: round2(offerDebt + leftover),
+      interest: round2(iOffer + iLeft),
+      payment: round2(payMade)
+    });
+  }
+  var paidOff = offerDebt <= 0.005 && leftover <= 0.005;
+  var paidOffByIntro = introMonths === 0
+    ? paidOff
+    : (offerPayoffMonth !== null && offerPayoffMonth <= introMonths);
+  return {
+    transferred: round2(transferred),
+    leftover: round2(leftoverInitial),
+    leftoverIncluded: leftoverInitial > 0.005,
+    totalFee: round2(feeAmt),
+    totalInterest: round2(totalInterest),
+    totalCost: round2(feeAmt + totalInterest),
+    months: paidOff ? month : Infinity,
+    paidOff: paidOff,
+    offerPayoffMonth: offerPayoffMonth,
+    paidOffByIntro: paidOffByIntro,
+    debtAfterIntro: round2(debtAfterIntro),
+    interestAfterIntro: round2(interestAfterIntro),
+    schedule: schedule
+  };
+}
+
+/* Simulate doing nothing: the balance stays at the current APR. */
+function simulateStay(balance, apr, monthlyPayment){
+  var debt = Math.max(0, parseNum(balance, 0));
+  var pay = Math.max(0, parseNum(monthlyPayment, 0));
+  var rate = clampNum(parseNum(apr, 0), 0, 100) / 100 / 12;
+  var totalInterest = 0;
+  var month = 0;
+  var schedule = [];
+  var MAX = 600;
+  while (month < MAX && debt > 0.005){
+    if (pay <= 0) break;
+    month++;
+    var i = debt * rate;
+    debt += i;
+    totalInterest += i;
+    var payMade = Math.min(pay, debt);
+    debt = Math.max(0, debt - payMade);
+    schedule.push({ month: month, debt: round2(debt), interest: round2(i), payment: round2(payMade) });
+  }
+  var paidOff = debt <= 0.005;
+  return {
+    months: paidOff ? month : Infinity,
+    paidOff: paidOff,
+    totalInterest: round2(totalInterest),
+    schedule: schedule
+  };
+}
+
+/* Exact monthly payment needed so the transferred debt (fee included)
+ * hits $0 at the end of the intro period. Classic amortization formula. */
+function requiredMonthlyPayment(o, balance){
+  var b = Math.max(0, parseNum(balance, 0));
+  var transferred = Math.min(b, o.limit);
+  var debt = transferred * (1 + clampNum(o.feePct, 0, 100) / 100);
+  var n = Math.max(0, Math.round(o.introMonths));
+  if (debt <= 0) return 0;
+  if (n <= 0) return round2(debt);
+  var r = clampNum(o.introApr, 0, 100) / 100 / 12;
+  if (r === 0) return round2(debt / n);
+  var p = debt * r / (1 - Math.pow(1 + r, -n));
+  return round2(p);
+}
+
+/* First month where cumulative transfer cost (fee + interest) drops below
+ * cumulative stay-put interest. null = the fee never pays for itself. */
+function breakEvenMonth(o, balance, currentApr, monthlyPayment){
+  var t = simulateTransfer(o, balance, currentApr, monthlyPayment);
+  if (!t.paidOff) return null;
+  var s = simulateStay(balance, currentApr, monthlyPayment);
+  if (!s.paidOff){
+    return { month: t.months, transferCost: t.totalCost, stayCost: Infinity,
+             savings: Infinity, stayNeverPaysOff: true };
+  }
+  var cumT = t.totalFee, cumS = 0;
+  var n = Math.max(t.schedule.length, s.schedule.length);
+  for (var i = 0; i < n; i++){
+    if (i < t.schedule.length) cumT += t.schedule[i].interest;
+    if (i < s.schedule.length) cumS += s.schedule[i].interest;
+    if (cumT < cumS){
+      return { month: i + 1, transferCost: round2(cumT), stayCost: round2(cumS),
+               savings: round2(cumS - cumT), stayNeverPaysOff: false };
+    }
+  }
+  return null;
+}
+
+/* Rank offers by total cost of transfer (fee + all interest, leftover included).
+ * Invalid offers get score Infinity and sort last. */
+function rankOffers(offers, balance, currentApr, monthlyPayment){
+  var rows = [];
+  for (var i = 0; i < offers.length; i++){
+    var o = sanitizeOffer(offers[i]);
+    var errs = validateOffer(o);
+    var sim = null, be = null, req = 0;
+    if (errs.length === 0){
+      sim = simulateTransfer(o, balance, currentApr, monthlyPayment);
+      req = requiredMonthlyPayment(o, balance);
+      be = breakEvenMonth(o, balance, currentApr, monthlyPayment);
+    }
+    rows.push({
+      index: i,
+      offer: o,
+      errors: errs,
+      sim: sim,
+      requiredPayment: req,
+      breakEven: be,
+      score: (sim && sim.paidOff) ? sim.totalCost : Infinity
+    });
+  }
+  rows.sort(function(a, b){
+    if (a.score === b.score) return a.index - b.index;
+    return a.score - b.score;
+  });
+  for (var j = 0; j < rows.length; j++) rows[j].rank = j + 1;
+  return rows;
+}
+
+/* Plain-English verdict for the planner: does the current payment beat the deadline? */
+function plannerVerdict(o, balance, currentApr, monthlyPayment){
+  var req = requiredMonthlyPayment(o, balance);
+  var pay = Math.max(0, parseNum(monthlyPayment, 0));
+  var sim = simulateTransfer(o, balance, currentApr, pay);
+  if (req <= 0) return { status: 'none', required: req, shortfall: 0, message: 'Nothing to pay off.' };
+  if (pay >= req){
+    return { status: 'on-track', required: req, shortfall: 0,
+             message: 'Paying ' + fmtMoney(pay) + '/mo clears the transfer before the intro ends. Nice.' };
+  }
+  return { status: 'short', required: req, shortfall: round2(req - pay),
+           message: 'You are ' + fmtMoney(req - pay) + '/mo short of beating the intro deadline.' };
+}
+
+</script>
+
+<!-- ============ UI WIRING (separate from pure lib) ============ -->
+<script>
+(function(){
+  'use strict';
+  function $(id){ return document.getElementById(id); }
+
+  var offerDefaults = defaultOffers();
+  var MAX_OFFERS = 3;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function addOfferCard(data, isWinner){
+    var list = $('sz-offer-list');
+    if (list.children.length >= MAX_OFFERS) return;
+    var d = data || { name:'', feePct:3, introApr:0, introMonths:15, postIntroApr:24.99, limit:12000 };
+    var card = document.createElement('div');
+    card.className = 'offer-card p-5' + (isWinner ? ' winner' : '');
+    card.innerHTML =
+      '<div class="flex items-center justify-between mb-4">' +
+        '<span class="mono text-[11px] tracking-[0.2em] uppercase" style="color:#A78BFA">Offer ' + (list.children.length + 1) + '</span>' +
+        '<button class="sz-remove text-slate-500 hover:text-red-400 text-sm font-semibold no-print" type="button">Remove</button>' +
+      '</div>' +
+      '<div class="mb-3"><label class="lbl">Card / offer name</label>' +
+        '<input class="field in-name" type="text" maxlength="40" value="' + esc(d.name) + '" placeholder="e.g. Card C"></div>' +
+      '<div class="grid grid-cols-2 gap-3">' +
+        '<div><label class="lbl">Transfer fee %</label><input class="field mono in-fee" type="number" min="0" max="15" step="0.01" value="' + esc(d.feePct) + '"></div>' +
+        '<div><label class="lbl">Intro APR %</label><input class="field mono in-intro-apr" type="number" min="0" max="40" step="0.01" value="' + esc(d.introApr) + '"></div>' +
+        '<div><label class="lbl">Intro months</label><input class="field mono in-intro-mo" type="number" min="0" max="36" step="1" value="' + esc(d.introMonths) + '"></div>' +
+        '<div><label class="lbl">Post-intro APR %</label><input class="field mono in-post-apr" type="number" min="0" max="40" step="0.01" value="' + esc(d.postIntroApr) + '"></div>' +
+      '</div>' +
+      '<div class="mt-3"><label class="lbl">Credit limit ($)</label><input class="field mono in-limit" type="number" min="0" step="1" value="' + esc(d.limit) + '"></div>' +
+      '<p class="sz-card-err mt-2 text-xs font-medium" style="color:#F87171"></p>';
+    card.querySelector('.sz-remove').addEventListener('click', function(){
+      if ($('sz-offer-list').children.length > 1){ card.remove(); recalc(); }
+    });
+    card.addEventListener('input', scheduleRecalc);
+    list.appendChild(card);
+    updateAddBtn();
+  }
+
+  function updateAddBtn(){
+    $('sz-add-offer').style.display = $('sz-offer-list').children.length >= MAX_OFFERS ? 'none' : '';
+  }
+
+  function readOffers(){
+    var cards = $('sz-offer-list').children;
+    var out = [];
+    for (var i = 0; i < cards.length; i++){
+      var c = cards[i];
+      out.push(sanitizeOffer({
+        name: c.querySelector('.in-name').value,
+        feePct: c.querySelector('.in-fee').value,
+        introApr: c.querySelector('.in-intro-apr').value,
+        introMonths: c.querySelector('.in-intro-mo').value,
+        postIntroApr: c.querySelector('.in-post-apr').value,
+        limit: c.querySelector('.in-limit').value
+      }));
+    }
+    return out;
+  }
+
+  var recalcTimer = null;
+  function scheduleRecalc(){
+    if (recalcTimer) clearTimeout(recalcTimer);
+    recalcTimer = setTimeout(recalc, 350);
+  }
+
+  var lastRows = null, lastStay = null, lastBalance = 0, lastApr = 0, lastPay = 0;
+
+  function recalc(){
+    var balance = $('sz-balance').value, apr = $('sz-current-apr').value, pay = $('sz-payment').value;
+    var errs = validateInputs(balance, apr, pay);
+    $('sz-errors').textContent = errs.join(' ');
+    if (errs.length){
+      $('sz-results').classList.add('hidden');
+      return;
+    }
+    lastBalance = parseNum(balance, 0); lastApr = parseNum(apr, 0); lastPay = parseNum(pay, 0);
+    var offers = readOffers();
+    lastRows = rankOffers(offers, lastBalance, lastApr, lastPay);
+    lastStay = simulateStay(lastBalance, lastApr, lastPay);
+    renderWinner();
+    renderTable();
+    renderPlanner();
+    renderBreakEven();
+    renderTimeline();
+    $('sz-results').classList.remove('hidden');
+  }
+
+  function validRows(){ return lastRows.filter(function(r){ return r.errors.length === 0; }); }
+
+  function renderWinner(){
+    var v = validRows();
+    var el = $('sz-winner');
+    if (!v.length){ el.innerHTML = '<p class="text-slate-400">Fix the offer errors to see a winner.</p>'; return; }
+    var w = v[0];
+    var saveVsStay = lastStay.paidOff ? Math.max(0, lastStay.totalInterest - w.sim.totalCost) : null;
+    el.innerHTML =
+      '<div class="flex items-start gap-4 flex-wrap">' +
+        '<span class="rank-pill" style="background:rgba(52,211,153,.15);color:#34D399;border:1px solid rgba(52,211,153,.5)">★</span>' +
+        '<div class="flex-1 min-w-[220px]">' +
+          '<p class="mono text-[11px] tracking-[0.25em] uppercase mb-1" style="color:#34D399">Winner · lowest total cost</p>' +
+          '<h3 class="text-2xl font-bold text-white">' + esc(w.offer.name) + '</h3>' +
+          '<p class="text-slate-400 text-sm mt-1">Total cost of transfer <strong class="text-white mono">' + fmtMoney(w.sim.totalCost) + '</strong>' +
+          ' <span class="text-slate-500">(fee ' + fmtMoney(w.sim.totalFee) + ' + interest ' + fmtMoney(w.sim.totalInterest) + ')</span>' +
+          (saveVsStay !== null ? ' · saves <strong style="color:#34D399">' + fmtMoney(saveVsStay) + '</strong> vs staying put' : '') + '</p>' +
+          (w.sim.leftoverIncluded ? '<p class="text-xs mt-2" style="color:#FBBF24">Note: ' + fmtMoney(w.sim.leftover) + ' exceeds this offer\u2019s limit and keeps accruing at your current APR — included in the cost above.</p>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  function rankBadge(rank){
+    var colors = ['#34D399', '#A78BFA', '#F59E0B'];
+    var c = colors[(rank - 1) % 3];
+    return '<span class="rank-pill" style="background:rgba(255,255,255,.04);color:' + c + ';border:1px solid ' + c + '55">' + rank + '</span>';
+  }
+
+  function renderTable(){
+    var el = $('sz-rank-table');
+    var html = '<table class="cmp-table min-w-[760px]"><thead><tr>' +
+      '<th>Rank</th><th>Offer</th><th>Transfer fee</th><th>Total interest</th><th>Total cost</th>' +
+      '<th>Months to $0</th><th>Required $/mo</th><th>Break-even</th></tr></thead><tbody>';
+    lastRows.forEach(function(r){
+      if (r.errors.length){
+        html += '<tr><td>' + rankBadge(r.rank) + '</td><td class="font-semibold text-white">' + esc(r.offer.name) + '</td>' +
+          '<td colspan="6" style="color:#F87171">' + esc(r.errors.join(' ')) + '</td></tr>';
+        return;
+      }
+      var s = r.sim;
+      var be = r.breakEven;
+      var beTxt = be ? ('Month ' + be.month) : '<span class="text-slate-500">Never</span>';
+      html += '<tr class="' + (r.rank === 1 ? 'row-winner' : '') + '">' +
+        '<td>' + rankBadge(r.rank) + '</td>' +
+        '<td><div class="font-semibold text-white">' + esc(r.offer.name) + '</div>' +
+          '<div class="text-xs text-slate-500 mono">' + fmtPct(r.offer.feePct) + ' fee · ' + fmtPct(r.offer.introApr) + ' for ' + r.offer.introMonths + ' mo · then ' + fmtPct(r.offer.postIntroApr) + '</div></td>' +
+        '<td class="mono">' + fmtMoney(s.totalFee) + '</td>' +
+        '<td class="mono">' + fmtMoney(s.totalInterest) + '</td>' +
+        '<td class="mono font-bold" style="color:' + (r.rank === 1 ? '#34D399' : '#EDE9FE') + '">' + fmtMoney(s.totalCost) + '</td>' +
+        '<td class="mono">' + (s.paidOff ? s.months : '∞') + '</td>' +
+        '<td class="mono">' + fmtMoney(r.requiredPayment) + '</td>' +
+        '<td class="mono">' + beTxt + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function renderPlanner(){
+    var v = validRows();
+    var el = $('sz-planner');
+    if (!v.length){ el.innerHTML = '<p class="text-slate-400">No valid offers yet.</p>'; return; }
+    var w = v[0], o = w.offer;
+    var req = w.requiredPayment;
+    var sliderMax = Math.max(Math.ceil(req * 1.8), Math.ceil(lastPay * 1.5), 100);
+    var sliderVal = Math.min(lastPay, sliderMax);
+    el.innerHTML =
+      '<h2 class="text-xl font-bold text-white mb-1">Required-payment planner</h2>' +
+      '<p class="text-sm text-slate-500 mb-4">Exact $/month to be debt-free before <strong class="text-slate-300">' + esc(o.name) + '</strong>\u2019s intro ends.</p>' +
+      '<p class="mono text-[11px] tracking-[0.2em] uppercase" style="color:#A78BFA">Pay this every month</p>' +
+      '<p id="sz-required" class="mono text-4xl font-bold mt-1" style="color:#A78BFA">' + fmtMoney(req) + '<span class="text-base text-slate-500">/mo</span></p>' +
+      '<p class="text-xs text-slate-500 mt-1">Covers the ' + fmtMoney(w.sim.transferred) + ' transfer + ' + fmtMoney(w.sim.totalFee) + ' fee over ' + o.introMonths + ' months at ' + fmtPct(o.introApr) + '.</p>' +
+      '<div class="mt-6"><label class="lbl" for="sz-pay-slider">Test your own monthly payment</label>' +
+      '<input id="sz-pay-slider" type="range" class="slider no-print" min="25" max="' + sliderMax + '" step="5" value="' + sliderVal + '">' +
+      '<div class="flex justify-between text-xs mono text-slate-500 mt-1"><span>$25</span><span id="sz-slider-val" class="text-white font-bold">' + fmtMoney(sliderVal) + '/mo</span><span>' + fmtMoney(sliderMax) + '</span></div></div>' +
+      '<div id="sz-planner-out" class="mt-4"></div>';
+    $('sz-pay-slider').addEventListener('input', function(){
+      var p = parseNum(this.value, 0);
+      $('sz-slider-val').textContent = fmtMoney(p) + '/mo';
+      updatePlannerOut(w, p);
+    });
+    updatePlannerOut(w, sliderVal);
+  }
+
+  function updatePlannerOut(w, p){
+    var o = w.offer;
+    var sim = simulateTransfer(o, lastBalance, lastApr, p);
+    var verdict = plannerVerdict(o, lastBalance, lastApr, p);
+    var color = verdict.status === 'on-track' ? '#34D399' : (verdict.status === 'short' ? '#FBBF24' : '#9C9CB0');
+    var monthTxt = sim.paidOff ? ('debt-free in <strong class="text-white">' + sim.months + ' months</strong>') : 'never fully pays off at this payment';
+    var deadlineTxt = sim.paidOffByIntro
+      ? '<span style="color:#34D399">Beats the ' + o.introMonths + '-month intro deadline.</span>'
+      : '<span style="color:#FBBF24">' + fmtMoney(sim.debtAfterIntro) + ' still owed when the intro ends — it then accrues at ' + fmtPct(o.postIntroApr) + '.</span>';
+    $('sz-planner-out').innerHTML =
+      '<div class="rounded-xl p-4" style="background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.25)">' +
+        '<p class="text-sm" style="color:' + color + '">' + esc(verdict.message) + '</p>' +
+        '<p class="text-sm text-slate-400 mt-2">At ' + fmtMoney(p) + '/mo you are ' + monthTxt + '.<br>' + deadlineTxt + '</p>' +
+      '</div>';
+  }
+
+  function renderBreakEven(){
+    var v = validRows();
+    var el = $('sz-break-even');
+    if (!v.length){ el.innerHTML = '<p class="text-slate-400">No valid offers yet.</p>'; return; }
+    var html = '';
+    v.forEach(function(r){
+      var be = r.breakEven;
+      var body;
+      if (!be){
+        body = '<p class="text-sm" style="color:#F87171"><strong>' + esc(r.offer.name) + ':</strong> the fee never pays for itself at your current payment — staying put is cheaper.</p>';
+      } else if (be.stayNeverPaysOff){
+        body = '<p class="text-sm text-slate-300"><strong>' + esc(r.offer.name) + ':</strong> break-even at <strong style="color:#34D399">month ' + be.month + '</strong> — and your current payment never clears the debt if you stay put.</p>';
+      } else {
+        body = '<p class="text-sm text-slate-300"><strong>' + esc(r.offer.name) + ':</strong> break-even at <strong style="color:#34D399">month ' + be.month + '</strong> ' +
+          '<span class="text-slate-500">(fee+interest ' + fmtMoney(be.transferCost) + ' vs stay-put interest ' + fmtMoney(be.stayCost) + ' → ' + fmtMoney(be.savings) + ' saved so far)</span></p>';
+      }
+      html += '<div class="rounded-xl p-4 mb-3" style="background:#0A0A0F;border:1px solid rgba(148,163,184,.15)">' + body + '</div>';
+    });
+    el.innerHTML = html;
+  }
+
+  function renderTimeline(){
+    var v = validRows();
+    var el = $('sz-timeline');
+    if (!v.length || !lastStay.schedule.length){ el.innerHTML = '<p class="text-slate-400">No data to chart yet.</p>'; return; }
+    var w = v[0], s = w.sim;
+    var W = 720, H = 260, padL = 56, padB = 30, padT = 14, padR = 12;
+    var iw = W - padL - padR, ih = H - padT - padB;
+    function downsample(pts, maxN){
+      if (pts.length <= maxN) return pts;
+      var step = (pts.length - 1) / (maxN - 1), out = [];
+      for (var i = 0; i < maxN; i++) out.push(pts[Math.round(i * step)]);
+      return out;
+    }
+    var winPts = downsample(s.schedule.map(function(p){ return p.totalDebt; }), 120);
+    var stayPts = downsample(lastStay.schedule.map(function(p){ return p.debt; }), 120);
+    var n = Math.max(winPts.length, stayPts.length);
+    var maxV = lastBalance * 1.02 || 1;
+    function X(i){ return padL + (n <= 1 ? 0 : (i / (n - 1)) * iw); }
+    function Y(val){ return padT + ih - (val / maxV) * ih; }
+    function path(pts){
+      var d = '';
+      for (var i = 0; i < pts.length; i++) d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(pts[i]).toFixed(1);
+      return d;
+    }
+    var grid = '';
+    for (var g = 0; g <= 4; g++){
+      var gy = padT + (ih / 4) * g, gv = maxV * (1 - g / 4);
+      grid += '<line x1="' + padL + '" y1="' + gy + '" x2="' + (W - padR) + '" y2="' + gy + '" class="tl-grid"/>' +
+              '<text x="' + (padL - 8) + '" y="' + (gy + 4) + '" text-anchor="end" class="tl-axis">' + fmtMoney(gv).replace('.00','') + '</text>';
+    }
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="w-full" role="img" aria-label="Payoff timeline chart">' + grid;
+    var be = w.breakEven;
+    if (be && !be.stayNeverPaysOff){
+      var bx = X(Math.min(be.month - 1, n - 1));
+      svg += '<line x1="' + bx.toFixed(1) + '" y1="' + padT + '" x2="' + bx.toFixed(1) + '" y2="' + (padT + ih) + '" stroke="#34D399" stroke-dasharray="5 4" stroke-width="1.5"/>' +
+             '<text x="' + (bx + 6).toFixed(1) + '" y="' + (padT + 12) + '" class="tl-axis" fill="#34D399">break-even mo ' + be.month + '</text>';
+    }
+    svg += '<path d="' + path(stayPts) + '" fill="none" stroke="#64748B" stroke-width="2" stroke-dasharray="6 4"/>' +
+           '<path d="' + path(winPts) + '" fill="none" stroke="#A78BFA" stroke-width="2.5"/>';
+    var lx = X(n - 1);
+    svg += '<circle cx="' + lx.toFixed(1) + '" cy="' + Y(winPts[winPts.length - 1]).toFixed(1) + '" r="4" fill="#A78BFA"/>';
+    svg += '<text x="' + padL + '" y="' + (H - 8) + '" class="tl-axis">month 1</text>' +
+           '<text x="' + (W - padR) + '" y="' + (H - 8) + '" text-anchor="end" class="tl-axis">month ' + Math.max(s.schedule.length, lastStay.schedule.length) + '</text></svg>';
+    el.innerHTML = svg +
+      '<div class="flex gap-6 mt-3 text-sm flex-wrap">' +
+        '<span class="flex items-center gap-2"><span class="inline-block w-6 h-0.5" style="background:#A78BFA"></span><span class="text-slate-300">' + esc(w.offer.name) + ' (winner)</span></span>' +
+        '<span class="flex items-center gap-2"><span class="inline-block w-6 h-0.5" style="background:#64748B"></span><span class="text-slate-400">Stay put at ' + fmtPct(lastApr) + '</span></span>' +
+        '<span class="flex items-center gap-2"><span class="inline-block w-6 h-0 border-t-2 border-dashed" style="border-color:#34D399"></span><span class="text-slate-400">Break-even month</span></span>' +
+      '</div>';
+  }
+
+  /* init */
+  offerDefaults.forEach(function(o){ addOfferCard(o); });
+  $('sz-add-offer').addEventListener('click', function(){ addOfferCard(); recalc(); });
+  $('sz-compare-btn').addEventListener('click', recalc);
+  ['sz-balance','sz-current-apr','sz-payment'].forEach(function(id){
+    $(id).addEventListener('input', scheduleRecalc);
+  });
+  recalc();
+})();
+</script>
+</body>
+</html>
